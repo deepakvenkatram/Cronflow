@@ -47,11 +47,8 @@ The scripts must have "execute" permissions to be run by the system.
 Tell the application about the new job and its schedule. For this test, the schedule is set to every two minutes for rapid feedback.
 
 3. Run the following command:
-   ```bash
-   curl -X POST "http://127.0.0.1:8000/jobs" \
-   -H "Content-Type: application/json" \
-   -d '{"name": "nightly-backup", "schedule": "*/2 * * * *"}'
-   ```
+   bash
+   curl -X POST "http://127.0.0.1:8000/jobs" -H "Content-Type: application/json" -d '{"name": "nightly-backup", "schedule": "*/2 * * * *"}'
 
 ---
 ### Step 4: Create the Cron Job
@@ -59,16 +56,13 @@ Tell the application about the new job and its schedule. For this test, the sche
 Add the job to your system's crontab to run it on the defined schedule.
 
 4. Open the crontab editor:
-   ```bash
+   bash
    crontab -e
-   ```
-
+   
 5. Add the following line to the file, then save and exit the editor. (Ensure the path is correct for your system).
-   ```crontab
+   crontab
    */2 * * * * /your/project/path/monitor.sh "nightly-backup" /your/project/path/my_nightly_backup.sh >> /tmp/nightly_backup.log 2>&1
-   ```
-
----
+  
 ### Step 5: Observe and Verify
 
 The cron job is now live and being monitored.
@@ -84,7 +78,9 @@ The cron job is now live and being monitored.
   - Save and exit.
   - After a few minutes, the scheduler will detect that the job did not run and will send a "missed" notification to Slack.
 
-Test Case 02: Realtime example for usage
+Test Case 02
+
+## Realtime example for usage
 
 The script is available in /scripts/check_disk_space.sh
 
