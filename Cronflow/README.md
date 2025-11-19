@@ -1,4 +1,4 @@
-# Cron Monitor
+# Cronflow
 
 A simple, self-hosted service to monitor cron jobs for success, failure, and missed executions, with real-time notifications sent to Slack.
 
@@ -28,7 +28,6 @@ Follow these steps to get the Cron Monitor running locally.
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
 cd cron-moniter
 ```
 
