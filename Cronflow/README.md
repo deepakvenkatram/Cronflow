@@ -27,29 +27,28 @@ Follow these steps to get the Cron Monitor running locally.
 
 ### 1. Clone the Repository
 
-```bash
-cd cron-moniter
-```
+bash
+git clone https://github.com/deepakvenkatram/Cronflow.git
+cd cronflow
+
 
 ### 2. Create a Virtual Environment
 
 It's highly recommended to use a virtual environment to manage dependencies.
 
-```bash
+bash
 # Create the virtual environment
 python3 -m venv venv
 
 # Activate it
 source venv/bin/activate
-```
 
 ### 3. Install Dependencies
 
 Install all the required Python packages.
 
-```bash
+bash
 pip install -r requirements.txt
-```
 
 ### 4. Create a Slack Incoming Webhook
 
@@ -78,21 +77,17 @@ The application reads the Slack URL from an environment variable for security. *
 
 In your terminal, run the following command, pasting your new webhook URL:
 
-```bash
+bash
 export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/NEW/URL"
-```
 
 ### 6. Run the Application
 
 You can now start the monitoring service using `uvicorn`.
 
-```bash
+bash
 uvicorn app.main:app --reload
-```
 
 The server will start on `http://127.0.0.1:8000`. You can view the interactive API documentation at `http://127.0.0.1:8000/docs`.
-
----
 
 ## Usage
 
@@ -100,11 +95,8 @@ The server will start on `http://127.0.0.1:8000`. You can view the interactive A
 
 First, you must register the job you want to monitor with the service. Send a `POST` request to the `/jobs` endpoint with the job's unique name and its cron schedule.
 
-```bash
-curl -X POST "http://127.0.0.1:8000/jobs" \
--H "Content-Type: application/json" \
--d '{"name": "daily-database-backup", "schedule": "0 2 * * *"}'
-```
+bash
+curl -X POST "http://127.0.0.1:8000/jobs" -H "Content-Type: application/json" -d '{"name": "daily-database-backup", "schedule": "0 2 * * *"}'
 
 ### 2. Wrap Your Cron Job
 
@@ -112,17 +104,15 @@ Modify your crontab to use the `scripts/monitor.sh` wrapper. The wrapper takes t
 
 **Before:**
 
-```crontab
+crontab -e
 # This script runs every day at 2 AM.
 0 2 * * * /home/user/scripts/backup_database.sh
-```
 
 **After:**
 
-```crontab
+crontab
 # The wrapper now monitors the script.
 0 2 * * * /path/to/your/cron-moniter/scripts/monitor.sh "daily-database-backup" /home/user/scripts/backup_database.sh
-```
 
 ### How the Wrapper Works
 
