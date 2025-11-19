@@ -1,0 +1,108 @@
+End-to-End Test Plan for Cron Monitor
+
+This document walks through the steps to set up and monitor a new cron job using the application.
+
+---
+### Prerequisites
+
+1. The Cron Monitor application is running.
+   (e.g., `uvicorn app.main:app --reload &`)
+2. The `SLACK_WEBHOOK_URL` environment variable is set in the shell where the server was started.
+
+---
+### Step 1: Create a Sample Script to Monitor
+
+This step creates a sample script named `my_nightly_backup.sh` in the `scripts/` directory. The script will randomly succeed or fail for testing purposes.
+
+1. Create the file `scripts/my_nightly_backup.sh` with the following content:
+   ```bash
+   #!/bin/bash
+
+   echo "Starting the nightly backup script..."
+
+   # Simulate a process that can succeed or fail
+   random_exit_code=$((RANDOM % 10))
+
+   # Fails 30% of the time (if the number is 0, 1, or 2)
+   if [ $random_exit_code -lt 3 ]; then
+       echo "Backup failed! Could not connect to the remote server."
+       exit 1
+   else
+       echo "Backup completed successfully."
+       exit 0
+   fi
+   ```
+---
+### Step 2: Make the Scripts Executable
+
+The scripts must have "execute" permissions to be run by the system.
+
+2. Run the following command in your terminal:
+   ```bash
+   chmod +x scripts/monitor.sh scripts/my_nightly_backup.sh
+   ```
+---
+### Step 3: Register the Job with the Monitor
+
+Tell the application about the new job and its schedule. For this test, the schedule is set to every two minutes for rapid feedback.
+
+3. Run the following command:
+   ```bash
+   curl -X POST "http://127.0.0.1:8000/jobs" \
+   -H "Content-Type: application/json" \
+   -d '{"name": "nightly-backup", "schedule": "*/2 * * * *"}'
+   ```
+
+---
+### Step 4: Create the Cron Job
+
+Add the job to your system's crontab to run it on the defined schedule.
+
+4. Open the crontab editor:
+   ```bash
+   crontab -e
+   ```
+
+5. Add the following line to the file, then save and exit the editor. (Ensure the path is correct for your system).
+   ```crontab
+   */2 * * * * /your/project/path/monitor.sh "nightly-backup" /your/project/path/my_nightly_backup.sh >> /tmp/nightly_backup.log 2>&1
+   ```
+
+---
+### Step 5: Observe and Verify
+
+The cron job is now live and being monitored.
+
+- **To Test Success/Failure:**
+  - Every two minutes, the job will run.
+  - If it fails, you will receive a Slack notification.
+  - You can view the live status by running: `curl http://127.0.0.1:8000/jobs`
+
+- **To Test Missed Notifications:**
+  - Open the crontab editor again: `crontab -e`
+  - Comment out the job by adding a `#` to the beginning of the line.
+  - Save and exit.
+  - After a few minutes, the scheduler will detect that the job did not run and will send a "missed" notification to Slack.
+
+Test Case 02: Realtime example for usage
+
+The script is available in /scripts/check_disk_space.sh
+
+Amke the script executable using chmod +x check_disk_space.sh
+Register the Job
+
+Run this command in your terminal to register the new job with the monitor. We'll schedule it to run every 5 minutes.
+
+curl -X POST "http://127.0.0.1:8000/jobs" -H "Content-Type: application/json" -d '{"name": "disk-space-check", "schedule": "*/5 * * * *"}'
+
+Step 3: Add the Job to Your Crontab
+
+1. Open the crontab editor:
+   crontab -e
+
+2. Add the following line to the file, then save and exit:
+
+*/5 * * * * /your/project/path/monitor.sh "disk-space-check" /your/project/path/check_disk_space.sh >> /tmp/disk_check.log 2>&1
+
+That's it! Your new disk space check is now being monitored. If your root filesystem's usage goes above 90%, the script will fail, and you will receive a Slack alert.
+
